@@ -6,9 +6,12 @@
   "scripts": {
     "start": "node dist/index.js",
     "start-dev": "nodemon -q .",
+    "start-cy": "node dist/indexForTests.js",
     "test": "npx jest",
     "test-w": "jest --watchAll",
     "test-cov": "jest --watchAll --collect-coverage",
+    "cy": "cypress run",
+    "cy-open": "cypress open",
     "prepare": "husky install",
     "build": "tsc"
   },
