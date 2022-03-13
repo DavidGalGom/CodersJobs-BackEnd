@@ -1,0 +1,41 @@
+{
+  "name": "codersjobs-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "test": "npx jest",
+    "test-w": "jest --watchAll",
+    "test-cov": "jest --watchAll --collect-coverage",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DavidGalGom/CodersJobs-BackEnd.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DavidGalGom/CodersJobs-BackEnd/issues"
+  },
+  "homepage": "https://github.com/DavidGalGom/CodersJobs-BackEnd#readme",
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.4",
+    "@babel/preset-typescript": "^7.16.0",
+    "@babel/types": "^7.16.0",
+    "@types/jest": "^27.4.1",
+    "@types/node": "^16.11.9",
+    "@typescript-eslint/eslint-plugin": "^5.14.0",
+    "@typescript-eslint/parser": "^5.14.0",
+    "eslint": "^8.11.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^16.1.2",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.25.4",
+    "jest": "^27.5.1",
+    "lint-staged": "^12.1.2",
+    "typescript": "^4.6.2"
+  }
+}
