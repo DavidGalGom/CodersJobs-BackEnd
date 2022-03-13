@@ -1,0 +1,9 @@
+{
+  "pluginsFile": false,
+  "supportFile": false,
+  "fixturesFolder": false,
+  "video": false,
+  "screenshotsFile": false,
+  "screenshotsFolder": false,
+  "baseUrl": "http://localhost:1000"
+}
