@@ -5,6 +5,7 @@ import morgan from "morgan";
 import Debug from "debug";
 import IError from "../interfaces/error";
 import { generalErrorHandler, notFoundErrorHandler } from "./middlewares/error";
+import usersRoutes from "./routes/usersRoutes";
 
 const debug = Debug("jobs:server");
 
@@ -33,5 +34,6 @@ export const initializeServer = (port) =>
 app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
+app.use("/users", usersRoutes);
 app.use(notFoundErrorHandler);
 app.use(generalErrorHandler);
