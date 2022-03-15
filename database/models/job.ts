@@ -47,6 +47,10 @@ const jobSchema = new Schema({
   image: {
     type: String,
   },
+  releaseDate: {
+    type: Date,
+    default: new Date(),
+  },
 });
 
 const Job = model("Job", jobSchema, "Jobs");
