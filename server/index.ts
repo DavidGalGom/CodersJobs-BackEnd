@@ -6,6 +6,7 @@ import Debug from "debug";
 import IError from "../interfaces/error";
 import { generalErrorHandler, notFoundErrorHandler } from "./middlewares/error";
 import usersRoutes from "./routes/usersRoutes";
+import jobsRoutes from "./routes/jobsRoutes";
 
 const debug = Debug("jobs:server");
 
@@ -35,5 +36,6 @@ app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 app.use("/users", usersRoutes);
+app.use("/jobs", jobsRoutes);
 app.use(notFoundErrorHandler);
 app.use(generalErrorHandler);
