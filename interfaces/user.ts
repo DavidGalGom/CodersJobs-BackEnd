@@ -5,4 +5,5 @@ export default interface IUser {
   email?: string;
   isAdmin?: boolean;
   jobsApplied?: [];
+  id?: string;
 }
