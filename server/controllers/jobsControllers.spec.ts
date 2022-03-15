@@ -1,6 +1,6 @@
 import { expect } from "@jest/globals";
 import Job from "../../database/models/job";
-import getJobs from "./jobsControllers";
+import { getJobs } from "./jobsControllers";
 import IJob from "../../interfaces/job";
 import TestError from "../../interfaces/testError";
 
