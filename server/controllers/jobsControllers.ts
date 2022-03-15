@@ -3,7 +3,7 @@ import Job from "../../database/models/job";
 
 dotenv.config();
 
-const getJobs = async (req, res, next) => {
+export const getJobs = async (req, res, next) => {
   try {
     const jobs = await Job.find();
     res.json(jobs);
@@ -14,4 +14,14 @@ const getJobs = async (req, res, next) => {
   }
 };
 
-export default getJobs;
+export const createJob = async (req, res, next) => {
+  try {
+    const job = req.body;
+    const newJob = await Job.create(job);
+    res.status(201).json(newJob);
+  } catch (error) {
+    error.code = 400;
+    error.message = "Bad request";
+    next(error);
+  }
+};
