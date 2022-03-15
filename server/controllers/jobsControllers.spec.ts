@@ -27,7 +27,7 @@ describe("Given a getJobs functions", () => {
         },
       ];
       Job.find = jest.fn().mockResolvedValue(jobs);
-      const res = {
+      const res: { json: () => string } = {
         json: jest.fn(),
       };
 
