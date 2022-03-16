@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import Job from "../../database/models/job";
+import IJob from "../../interfaces/job";
 
 dotenv.config();
 
@@ -60,16 +61,18 @@ export const deleteJob = async (req, res, next) => {
 };
 
 export const updateJob = async (req, res, next) => {
+  const job: IJob = req.body;
   const { idJob } = req.params;
   const authExist = req.header("Authorization");
   try {
     const token = authExist.split(" ")[1];
     const user = jwt.verify(token, process.env.TOKEN);
     if (idJob) {
-      const idOwner = await Job.find(user.Id);
-      if (idOwner) {
-        const updatedJob = await Job.findByIdAndUpdate(idJob, idOwner);
-        res.json({ updatedJob });
+      if (user.id === job.owner) {
+        const updatedJob = await Job.findByIdAndUpdate(idJob, job, {
+          new: true,
+        });
+        res.json(updatedJob);
       } else {
         const error: { message: string; code: number } = {
           message: "Can't update other people jobs",
