@@ -1,6 +1,6 @@
 import { expect } from "@jest/globals";
 import Job from "../../database/models/job";
-import { getJobs, createJob, deleteJob } from "./jobsControllers";
+import { getJobs, createJob, deleteJob, updateJob } from "./jobsControllers";
 import IJob from "../../interfaces/job";
 import TestError from "../../interfaces/testError";
 import IResponseTest from "../../interfaces/response";
@@ -221,6 +221,54 @@ describe("Given a deleteJob function", () => {
         "Can't delete other people jobs"
       );
       expect(next.mock.calls[0][0]).toHaveProperty("code", 401);
+    });
+  });
+});
+
+describe("Given a updateJob function", () => {
+  describe("When it receives a wrong request", () => {
+    test("Then it should return an error code 400 and message Bad update request", async () => {
+      const idJob: number = 123456789;
+      const auth: jest.Mock = jest.fn();
+      const job: IJob = {
+        title: " sample job",
+        company: "sample company",
+        companyAnchor: "sample company anchor",
+        jobAnchor: "sample job anchor",
+        description: "sample description",
+        contactPerson: "sample person",
+        salary: 28000,
+        numberOfWorkers: 6,
+        startup: true,
+        location: "Barcelona",
+        desiredProfile: "sample profile",
+        image: "sample image",
+        releaseDate: "15/03/2022",
+        owner: "123456789",
+      };
+
+      const req: { params: { idJob }; body: { job }; header: () => jest.Mock } =
+        {
+          params: {
+            idJob,
+          },
+          body: {
+            job,
+          },
+          header: () => auth,
+        };
+      const next: jest.Mock = jest.fn();
+      const error: { code: number; message: string } = {
+        code: 400,
+        message: "Bad update request",
+      };
+      Job.findByIdAndUpdate = jest.fn().mockRejectedValue(error);
+
+      await updateJob(req, null, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(next.mock.calls[0][0]).toHaveProperty("message", error.message);
+      expect(next.mock.calls[0][0]).toHaveProperty("code", error.code);
     });
   });
 });
