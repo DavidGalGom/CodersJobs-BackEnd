@@ -34,7 +34,9 @@ describe("Given a getJobs functions", () => {
           releaseDate: "15/03/2022",
         },
       ];
-      Job.find = jest.fn().mockResolvedValue(jobs);
+      Job.find = jest
+        .fn()
+        .mockReturnValue({ populate: jest.fn().mockResolvedValue(jobs) });
       const res: { json: () => string } = {
         json: jest.fn(),
       };

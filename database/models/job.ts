@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
 const jobSchema = new Schema({
   title: {
@@ -50,6 +50,11 @@ const jobSchema = new Schema({
   releaseDate: {
     type: Date,
     default: new Date(),
+  },
+  owner: {
+    type: Types.ObjectId,
+    ref: "User",
+    required: true,
   },
 });
 
