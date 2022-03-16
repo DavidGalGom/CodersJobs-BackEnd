@@ -14,6 +14,7 @@ const initializeMongoDBServer = (connectionString) =>
       debug(chalk.green("Connected to the database"));
       resolve();
     });
+    mongoose.set("returnOriginal", false);
     mongoose.set("debug", true);
     mongoose.set("toJSON", {
       virtuals: true,
