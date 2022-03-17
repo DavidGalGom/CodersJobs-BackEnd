@@ -93,3 +93,21 @@ export const updateJob = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getJobById = async (req, res, next) => {
+  const { idJob } = req.params;
+  try {
+    const searchedJob = await Job.findById(idJob);
+    if (searchedJob) {
+      res.json(searchedJob);
+    } else {
+      const error: any = new Error("Job not found");
+      error.code = 404;
+      next(error);
+    }
+  } catch (error) {
+    error.code = 400;
+    error.message = "Bad request";
+    next(error);
+  }
+};
