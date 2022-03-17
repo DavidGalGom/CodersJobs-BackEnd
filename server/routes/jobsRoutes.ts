@@ -4,6 +4,7 @@ import {
   createJob,
   deleteJob,
   updateJob,
+  getJobById,
 } from "../controllers/jobsControllers";
 import auth from "../middlewares/auth";
 
@@ -13,4 +14,5 @@ router.get("/", getJobs);
 router.post("/", auth, createJob);
 router.delete("/:idJob/:idOwner", auth, deleteJob);
 router.put("/:idJob", auth, updateJob);
+router.get("/:idJob", getJobById);
 export default router;

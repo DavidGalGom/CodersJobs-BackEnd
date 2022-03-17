@@ -1,6 +1,12 @@
 import { expect } from "@jest/globals";
 import Job from "../../database/models/job";
-import { getJobs, createJob, deleteJob, updateJob } from "./jobsControllers";
+import {
+  getJobs,
+  createJob,
+  deleteJob,
+  updateJob,
+  getJobById,
+} from "./jobsControllers";
 import IJob from "../../interfaces/job";
 import TestError from "../../interfaces/testError";
 import IResponseTest from "../../interfaces/response";
@@ -269,6 +275,63 @@ describe("Given a updateJob function", () => {
       expect(next).toHaveBeenCalled();
       expect(next.mock.calls[0][0]).toHaveProperty("message", error.message);
       expect(next.mock.calls[0][0]).toHaveProperty("code", error.code);
+    });
+  });
+});
+
+describe("Given a getJobById function", () => {
+  describe("When it receives a request with a correct jobId", () => {
+    test("Then it should summon res.json with the searched job", async () => {
+      Job.findById = jest.fn().mockResolvedValue({});
+      const idJob: number = 12345;
+      const req: { params } = {
+        params: idJob,
+      };
+      const res: { json: () => string } = { json: jest.fn() };
+
+      await getJobById(req, res, null);
+
+      expect(res.json).toHaveBeenCalled();
+    });
+  });
+
+  describe("When it receives a request with a wrong idJob", () => {
+    test("Then it should summon next with a code 404 and a jon not found message", async () => {
+      const error: any = new Error("Job not found");
+      Job.findById = jest.fn().mockResolvedValue(null);
+      const idJob: number = 10;
+      const req = {
+        params: {
+          idJob,
+        },
+      };
+      const res = {
+        json: jest.fn(),
+      };
+      const next = jest.fn();
+
+      await getJobById(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(error);
+      expect(next.mock.calls[0][0]).toHaveProperty("message", "Job not found");
+      expect(next.mock.calls[0][0]).toHaveProperty("code", 404);
+    });
+  });
+
+  describe("When receives a Job.findById reject", () => {
+    test("Then it should summon next function with the rejected error", async () => {
+      const error = {};
+      Job.findById = jest.fn().mockRejectedValue(error);
+      const req = {
+        params: {
+          idComponent: 1,
+        },
+      };
+      const next = jest.fn();
+
+      await getJobById(req, null, next);
+
+      expect(next).toHaveBeenCalledWith(error);
     });
   });
 });
