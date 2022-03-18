@@ -66,3 +66,17 @@ export const loginUser = async (req, res, next) => {
     }
   }
 };
+
+export const getUsers = async (req, res, next) => {
+  try {
+    const users = await User.find().populate({
+      path: "jobsApplied",
+      select: "title",
+    });
+    res.json(users);
+  } catch (error) {
+    error.message = "Can't find the users";
+    error.code = 400;
+    next(error);
+  }
+};
