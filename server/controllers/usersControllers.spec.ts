@@ -5,7 +5,7 @@ import User from "../../database/models/user";
 import IResponseTest from "../../interfaces/response";
 import TestError from "../../interfaces/testError";
 import IUser from "../../interfaces/user";
-import { addUser, loginUser } from "./usersControllers";
+import { addUser, getUsers, loginUser } from "./usersControllers";
 
 jest.mock("../../database/models/user");
 jest.mock("bcrypt");
@@ -146,6 +146,52 @@ describe("Given a loginUser function", () => {
         expectedError.message
       );
       expect(next.mock.calls[0][0]).toHaveProperty("code", expectedError.code);
+    });
+  });
+});
+
+describe("Given a getUsers function", () => {
+  describe("When it receives an object res", () => {
+    test("Then it should summon method json", async () => {
+      const users: [IUser] = [
+        {
+          userName: "Admin",
+          password: "*******",
+          name: "Admin",
+          email: "admin@gmail.com",
+          isAdmin: true,
+          jobsApplied: [],
+        },
+      ];
+      User.find = jest
+        .fn()
+        .mockReturnValue({ populate: jest.fn().mockResolvedValue(users) });
+      const res: { json: () => string } = {
+        json: jest.fn(),
+      };
+
+      await getUsers(null, res, null);
+
+      expect(User.find).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith(users);
+    });
+  });
+
+  describe("When its called wrong", () => {
+    test("Then it should return an error and code 400 ", async () => {
+      User.find = jest.fn().mockResolvedValue(null);
+      const next: jest.Mock = jest.fn();
+      const expectedError = new Error("Can't find the users") as TestError;
+      expectedError.code = 400;
+
+      await getUsers(null, null, next);
+
+      expect(next).toHaveBeenCalledWith(expectedError);
+      expect(next.mock.calls[0][0]).toHaveProperty(
+        "message",
+        "Can't find the users"
+      );
+      expect(next.mock.calls[0][0]).toHaveProperty("code", 400);
     });
   });
 });
