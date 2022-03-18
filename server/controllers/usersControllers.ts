@@ -80,3 +80,24 @@ export const getUsers = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getUserById = async (req, res, next) => {
+  const { userId } = req.params;
+  try {
+    const searchedUser = await User.findById(userId).populate({
+      path: "jobsApplied",
+      select: "title",
+    });
+    if (searchedUser) {
+      res.json(searchedUser);
+    } else {
+      const error: any = new Error("User not found");
+      error.code = 404;
+      next(error);
+    }
+  } catch (error) {
+    error.code = 400;
+    error.message = "Bad request";
+    next(error);
+  }
+};
