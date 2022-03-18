@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.get("/", getJobs);
 router.post("/", auth, createJob);
-router.delete("/:idJob/:idOwner", auth, deleteJob);
+router.delete("/:idJob", auth, deleteJob);
 router.put("/:idJob", auth, updateJob);
 router.get("/:idJob", getJobById);
 export default router;
