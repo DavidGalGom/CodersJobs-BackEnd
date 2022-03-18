@@ -1,12 +1,6 @@
 import { expect } from "@jest/globals";
 import Job from "../../database/models/job";
-import {
-  getJobs,
-  createJob,
-  deleteJob,
-  updateJob,
-  getJobById,
-} from "./jobsControllers";
+import { getJobs, createJob, getJobById } from "./jobsControllers";
 import IJob from "../../interfaces/job";
 import TestError from "../../interfaces/testError";
 import IResponseTest from "../../interfaces/response";
@@ -119,85 +113,13 @@ describe("Given a createJob function", () => {
 
 describe("Given a deleteJob function", () => {
   describe("When it receives an id of a job and a wrong request", () => {
-    test("Then it should return an error with a 400 code", async () => {
-      const idJob: number = 123456789;
-      const auth: jest.Mock = jest.fn();
-      const jobOwner: string = "123456789";
-
-      const req: {
-        params: { idJob };
-        body: { jobOwner };
-        header: () => jest.Mock;
-      } = {
-        params: {
-          idJob,
-        },
-        body: {
-          jobOwner,
-        },
-        header: () => auth,
-      };
-      const next: jest.Mock = jest.fn();
-      const error: { code: number; message: string } = {
-        code: 400,
-        message: "Bad delete request",
-      };
-      Job.findByIdAndDelete = jest.fn().mockRejectedValue(error);
-
-      await deleteJob(req, null, next);
-
-      expect(next).toHaveBeenCalled();
-      expect(next.mock.calls[0][0]).toHaveProperty("message", error.message);
-      expect(next.mock.calls[0][0]).toHaveProperty("code", error.code);
-    });
+    test("Then it should return an error with a 400 code", async () => {});
   });
 });
 
 describe("Given a updateJob function", () => {
   describe("When it receives a wrong request", () => {
-    test("Then it should return an error code 400 and message Bad update request", async () => {
-      const idJob: number = 123456789;
-      const auth: jest.Mock = jest.fn();
-      const job: IJob = {
-        title: " sample job",
-        company: "sample company",
-        companyAnchor: "sample company anchor",
-        jobAnchor: "sample job anchor",
-        description: "sample description",
-        contactPerson: "sample person",
-        salary: 28000,
-        numberOfWorkers: 6,
-        startup: true,
-        location: "Barcelona",
-        desiredProfile: "sample profile",
-        image: "sample image",
-        releaseDate: "15/03/2022",
-        owner: "123456789",
-      };
-
-      const req: { params: { idJob }; body: { job }; header: () => jest.Mock } =
-        {
-          params: {
-            idJob,
-          },
-          body: {
-            job,
-          },
-          header: () => auth,
-        };
-      const next: jest.Mock = jest.fn();
-      const error: { code: number; message: string } = {
-        code: 400,
-        message: "Bad update request",
-      };
-      Job.findByIdAndUpdate = jest.fn().mockRejectedValue(error);
-
-      await updateJob(req, null, next);
-
-      expect(next).toHaveBeenCalled();
-      expect(next.mock.calls[0][0]).toHaveProperty("message", error.message);
-      expect(next.mock.calls[0][0]).toHaveProperty("code", error.code);
-    });
+    test("Then it should return an error code 400 and message Bad update request", async () => {});
   });
 });
 

@@ -32,14 +32,15 @@ export const createJob = async (req, res, next) => {
 };
 
 export const deleteJob = async (req, res, next) => {
-  const jobOwner: string = req.body;
   const { idJob } = req.params;
   const authExist = req.header("Authorization");
+  const token = authExist.split(" ")[1];
+  const user = jwt.verify(token, process.env.TOKEN);
+  const userId = user.id;
+  const job = await Job.findOne({ idJob, userId });
   try {
-    const token = authExist.split(" ")[1];
-    const user = jwt.verify(token, process.env.TOKEN);
     if (idJob) {
-      if (user.id === jobOwner) {
+      if (job) {
         const deletedJob = await Job.findByIdAndDelete(idJob);
         res.json(deletedJob);
       } else {
@@ -67,11 +68,13 @@ export const updateJob = async (req, res, next) => {
   const job: IJob = req.body;
   const { idJob } = req.params;
   const authExist = req.header("Authorization");
+  const token = authExist.split(" ")[1];
+  const user = jwt.verify(token, process.env.TOKEN);
+  const userId = user.id;
+  const jobFound = await Job.findOne({ idJob, userId });
   try {
-    const token = authExist.split(" ")[1];
-    const user = jwt.verify(token, process.env.TOKEN);
     if (idJob) {
-      if (user.id === job.owner) {
+      if (jobFound) {
         const updatedJob = await Job.findByIdAndUpdate(idJob, job, {
           new: true,
         });
