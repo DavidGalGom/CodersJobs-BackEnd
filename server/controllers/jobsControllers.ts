@@ -32,24 +32,28 @@ export const createJob = async (req, res, next) => {
 };
 
 export const deleteJob = async (req, res, next) => {
-  const { idJob, idOwner } = req.params;
-  const { userId } = req.body;
+  const { idJob } = req.params;
+  const authExist = req.header("Authorization");
+  const token = authExist.split(" ")[1];
+  const user = jwt.verify(token, process.env.TOKEN);
+  const userId = user.id;
+  const job = await Job.findOne({ idJob, userId });
   try {
-    if (userId === idOwner) {
-      const deletedJob = await Job.findByIdAndDelete(idJob);
-      if (deletedJob) {
-        res.json({ id: deletedJob.id });
+    if (idJob) {
+      if (job) {
+        const deletedJob = await Job.findByIdAndDelete(idJob);
+        res.json(deletedJob);
       } else {
         const error: { message: string; code: number } = {
-          message: "Job not found",
-          code: 404,
+          message: "Can't delete other people jobs",
+          code: 401,
         };
         next(error);
       }
     } else {
       const error: { message: string; code: number } = {
-        message: "Can't delete other people jobs",
-        code: 401,
+        message: "Job not found",
+        code: 404,
       };
       next(error);
     }
@@ -64,11 +68,13 @@ export const updateJob = async (req, res, next) => {
   const job: IJob = req.body;
   const { idJob } = req.params;
   const authExist = req.header("Authorization");
+  const token = authExist.split(" ")[1];
+  const user = jwt.verify(token, process.env.TOKEN);
+  const userId = user.id;
+  const jobFound = await Job.findOne({ idJob, userId });
   try {
-    const token = authExist.split(" ")[1];
-    const user = jwt.verify(token, process.env.TOKEN);
     if (idJob) {
-      if (user.id === job.owner) {
+      if (jobFound) {
         const updatedJob = await Job.findByIdAndUpdate(idJob, job, {
           new: true,
         });
