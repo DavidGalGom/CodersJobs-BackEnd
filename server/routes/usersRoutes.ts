@@ -4,6 +4,7 @@ import {
   addUser,
   getUsers,
   getUserById,
+  updateUser,
 } from "../controllers/usersControllers";
 import adminAuth from "../middlewares/adminAuth";
 import auth from "../middlewares/auth";
@@ -14,5 +15,6 @@ router.post("/register", addUser);
 router.post("/login", loginUser);
 router.get("/", auth, adminAuth, getUsers);
 router.get("/:userId", auth, getUserById);
+router.put("/:idUser", auth, updateUser);
 
 export default router;
