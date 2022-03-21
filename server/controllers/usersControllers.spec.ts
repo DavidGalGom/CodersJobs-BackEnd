@@ -5,7 +5,13 @@ import User from "../../database/models/user";
 import IResponseTest from "../../interfaces/response";
 import TestError from "../../interfaces/testError";
 import IUser from "../../interfaces/user";
-import { addUser, getUserById, getUsers, loginUser } from "./usersControllers";
+import {
+  addUser,
+  getUserById,
+  getUsers,
+  loginUser,
+  updateUser,
+} from "./usersControllers";
 
 jest.mock("../../database/models/user");
 jest.mock("bcrypt");
@@ -267,6 +273,48 @@ describe("Given a getUsersById function", () => {
       expect(next).toHaveBeenCalled();
       expect(next.mock.calls[0][0]).toHaveProperty("message", "Bad request");
       expect(next.mock.calls[0][0]).toHaveProperty("code", 400);
+    });
+  });
+});
+
+describe("Given a updateUser function", () => {
+  describe("When it receives a correct idUser and body", () => {
+    test("Then it should summon res.json with the updated user", async () => {
+      const user: IUser = {
+        userName: "Admin",
+        password: "*******",
+        name: "Admin",
+        email: "admin@gmail.com",
+        isAdmin: true,
+        jobsApplied: [],
+        id: "12345",
+      };
+      const idUser: number = 12345;
+      const loggedUserId: number = 12345;
+      const userFound: IUser = {
+        userName: "Admin",
+        password: "*******",
+        name: "Admin",
+        email: "admin@gmail.com",
+        isAdmin: true,
+        jobsApplied: [],
+        id: "12345",
+      };
+      jwt.verify = jest.fn().mockResolvedValue(loggedUserId);
+      User.findOne = jest.fn().mockResolvedValue(userFound);
+      const req: { body; params; header } = {
+        body: user,
+        params: { idUser },
+        header: () => "Authorization",
+      };
+      const res: { json: jest.Mock } = {
+        json: jest.fn(),
+      };
+      User.findByIdAndUpdate = jest.fn().mockResolvedValue(user);
+
+      await updateUser(req, res, null);
+
+      expect(res.json).toHaveBeenCalledWith(user);
     });
   });
 });
