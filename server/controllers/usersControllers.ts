@@ -127,7 +127,7 @@ export const updateUser = async (req, res, next) => {
       }
     } else {
       const error: { message: string; code: number } = {
-        message: "User not found2",
+        message: "User not found",
         code: 404,
       };
       next(error);

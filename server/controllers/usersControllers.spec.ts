@@ -317,4 +317,126 @@ describe("Given a updateUser function", () => {
       expect(res.json).toHaveBeenCalledWith(user);
     });
   });
+
+  describe("When it receives a request with no params", () => {
+    test("Then it should summon next with a 404 code and user not found", async () => {
+      const user: IUser = {
+        userName: "Admin",
+        password: "*******",
+        name: "Admin",
+        email: "admin@gmail.com",
+        isAdmin: true,
+        jobsApplied: [],
+        id: "12345",
+      };
+      const idUser: number = 1234;
+      const loggedUserId: number = 12345;
+      const userFound: IUser = {
+        userName: "Admin",
+        password: "*******",
+        name: "Admin",
+        email: "admin@gmail.com",
+        isAdmin: true,
+        jobsApplied: [],
+        id: "12345",
+      };
+      jwt.verify = jest.fn().mockResolvedValue(loggedUserId);
+      User.findOne = jest.fn().mockResolvedValue(userFound);
+      const req: { body; params; header } = {
+        body: user,
+        params: idUser,
+        header: () => "Authorization",
+      };
+      const res: { json: jest.Mock } = {
+        json: jest.fn(),
+      };
+      const next: jest.Mock = jest.fn();
+      const expectedError: {
+        message: string;
+        code: number;
+      } = {
+        message: "User not found",
+        code: 404,
+      };
+      User.findByIdAndUpdate = jest.fn().mockResolvedValue(null);
+
+      await updateUser(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expectedError);
+      expect(next.mock.calls[0][0]).toHaveProperty("message", "User not found");
+      expect(next.mock.calls[0][0]).toHaveProperty("code", 404);
+    });
+  });
+
+  describe("When it receives a rejected promise", () => {
+    test("Then it should summon next with an error", async () => {
+      const user: IUser = {
+        userName: "Admin",
+        password: "*******",
+        name: "Admin",
+        email: "admin@gmail.com",
+        isAdmin: true,
+        jobsApplied: [],
+        id: "12345",
+      };
+      const idUser: number = 12345;
+      const req: { body; params; header } = {
+        body: user,
+        params: { idUser },
+        header: () => "Authorization",
+      };
+      const next: jest.Mock = jest.fn();
+      User.findByIdAndUpdate = jest.fn().mockResolvedValue(null);
+
+      await updateUser(req, null, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(next.mock.calls[0][0]).toHaveProperty(
+        "message",
+        "Bad update request"
+      );
+      expect(next.mock.calls[0][0]).toHaveProperty("code", 400);
+    });
+  });
+  describe("When it receives a request with other user", () => {
+    test("Then it should summon next with a 401 and a message can't update other people", async () => {
+      const user: IUser = {
+        userName: "Admin",
+        password: "*******",
+        name: "Admin",
+        email: "admin@gmail.com",
+        isAdmin: true,
+        jobsApplied: [],
+        id: "12345",
+      };
+      const idUser: number = 12345;
+      const loggedUserId: number = 12345;
+      const expectedError: { message: string; code: number } = {
+        message: "Can't update other people",
+        code: 401,
+      };
+      jwt.verify = jest.fn().mockResolvedValue(loggedUserId);
+
+      User.findOne = jest.fn().mockResolvedValue(null);
+      const req: { body; params; header } = {
+        body: user,
+        params: { idUser },
+        header: () => "Authorization",
+      };
+      const res: { json } = {
+        json: jest.fn(),
+      };
+      const next: jest.Mock = jest.fn();
+      User.findByIdAndUpdate = jest.fn().mockResolvedValue(user);
+
+      await updateUser(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expectedError);
+      expect(next.mock.calls[0][0]).toHaveProperty(
+        "message",
+        "Can't update other people"
+      );
+      expect(next.mock.calls[0][0]).toHaveProperty("code", 401);
+    });
+  });
 });
