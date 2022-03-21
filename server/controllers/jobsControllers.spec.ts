@@ -1,6 +1,7 @@
 import { expect } from "@jest/globals";
+import jwt from "jsonwebtoken";
 import Job from "../../database/models/job";
-import { getJobs, createJob, getJobById } from "./jobsControllers";
+import { getJobs, createJob, getJobById, updateJob } from "./jobsControllers";
 import IJob from "../../interfaces/job";
 import TestError from "../../interfaces/testError";
 import IResponseTest from "../../interfaces/response";
@@ -118,8 +119,172 @@ describe("Given a deleteJob function", () => {
 });
 
 describe("Given a updateJob function", () => {
+  describe("When it receives a correct request", () => {
+    test("Then it should summon res.json", async () => {
+      const job: IJob = {
+        title: " sample job",
+        company: "sample company",
+        companyAnchor: "sample company anchor",
+        jobAnchor: "sample job anchor",
+        description: "sample description",
+        contactPerson: "sample person",
+        salary: 28000,
+        numberOfWorkers: 6,
+        startup: true,
+        location: "Barcelona",
+        desiredProfile: "sample profile",
+        image: "sample image",
+        releaseDate: "15/03/2022",
+      };
+      const idJob: number = 12345;
+      const userId: number = 12345;
+      const jobFound: IJob = {
+        title: " sample job",
+        company: "sample company",
+        companyAnchor: "sample company anchor",
+        jobAnchor: "sample job anchor",
+        description: "sample description",
+        contactPerson: "sample person",
+        salary: 28000,
+        numberOfWorkers: 6,
+        startup: true,
+        location: "Barcelona",
+        desiredProfile: "sample profile",
+        image: "sample image",
+        releaseDate: "15/03/2022",
+      };
+      jwt.verify = jest.fn().mockResolvedValue(userId);
+      Job.findOne = jest.fn().mockResolvedValue(jobFound);
+      const req: { body; params; header } = {
+        body: job,
+        params: { idJob },
+        header: () => "Authorization",
+      };
+      const res: { json } = {
+        json: jest.fn(),
+      };
+      Job.findByIdAndUpdate = jest.fn().mockResolvedValue(job);
+
+      await updateJob(req, res, null);
+
+      expect(res.json).toHaveBeenCalledWith(job);
+    });
+  });
+
   describe("When it receives a wrong request", () => {
-    test("Then it should return an error code 400 and message Bad update request", async () => {});
+    test("Then it should summon next with a 400 and a message bad update request", async () => {
+      const job: IJob = {
+        title: " sample job",
+        company: "sample company",
+        companyAnchor: "sample company anchor",
+        jobAnchor: "sample job anchor",
+        description: "sample description",
+        contactPerson: "sample person",
+        salary: 28000,
+        numberOfWorkers: 6,
+        startup: true,
+        location: "Barcelona",
+        desiredProfile: "sample profile",
+        image: "sample image",
+        releaseDate: "15/03/2022",
+      };
+      const idJob: number = 12345;
+      const loggedUserId: number = 12345;
+      const req: { body; params; header } = {
+        body: job,
+        params: { idJob },
+        header: () => "Authorization",
+      };
+      jwt.verify = jest.fn().mockResolvedValue(loggedUserId);
+      const next: jest.Mock = jest.fn();
+      Job.findByIdAndUpdate = jest.fn().mockRejectedValue({});
+
+      await updateJob(req, null, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(next.mock.calls[0][0]).toHaveProperty(
+        "message",
+        "Bad update request"
+      );
+      expect(next.mock.calls[0][0]).toHaveProperty("code", 400);
+    });
+  });
+
+  describe("When it receives a wrong id", () => {
+    test("Then it should return an error code 404 and message job not found", async () => {
+      const job: IJob = {
+        title: " sample job",
+        company: "sample company",
+        companyAnchor: "sample company anchor",
+        jobAnchor: "sample job anchor",
+        description: "sample description",
+        contactPerson: "sample person",
+        salary: 28000,
+        numberOfWorkers: 6,
+        startup: true,
+        location: "Barcelona",
+        desiredProfile: "sample profile",
+        image: "sample image",
+        releaseDate: "15/03/2022",
+      };
+      const idJob: number = 12345;
+      const loggedUserId: number = 12345;
+      const req: { body; params; header } = {
+        body: job,
+        params: idJob,
+        header: () => "Authorization",
+      };
+      jwt.verify = jest.fn().mockResolvedValue(loggedUserId);
+      const next: jest.Mock = jest.fn();
+      Job.findByIdAndUpdate = jest.fn().mockResolvedValue(null);
+
+      await updateJob(req, null, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(next.mock.calls[0][0]).toHaveProperty("message", "Job not found");
+      expect(next.mock.calls[0][0]).toHaveProperty("code", 404);
+    });
+  });
+
+  describe("When it receives a wrong id", () => {
+    test("Then it should return an error code 401 and message Can't update other people jobs", async () => {
+      const job: IJob = {
+        title: " sample job",
+        company: "sample company",
+        companyAnchor: "sample company anchor",
+        jobAnchor: "sample job anchor",
+        description: "sample description",
+        contactPerson: "sample person",
+        salary: 28000,
+        numberOfWorkers: 6,
+        startup: true,
+        location: "Barcelona",
+        desiredProfile: "sample profile",
+        image: "sample image",
+        releaseDate: "15/03/2022",
+      };
+      const idJob: number = 12345;
+      const userId: number = 12345;
+      jwt.verify = jest.fn().mockResolvedValue(userId);
+      Job.findOne = jest.fn().mockResolvedValue(null);
+      const req: { body; params; header } = {
+        body: job,
+        params: { idJob },
+        header: () => "Authorization",
+      };
+
+      const next: jest.Mock = jest.fn();
+      Job.findByIdAndUpdate = jest.fn().mockResolvedValue(null);
+
+      await updateJob(req, null, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(next.mock.calls[0][0]).toHaveProperty(
+        "message",
+        "Can't update other people jobs"
+      );
+      expect(next.mock.calls[0][0]).toHaveProperty("code", 401);
+    });
   });
 });
 
