@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../../database/models/user";
+import IUser from "../../interfaces/user";
 
 dotenv.config();
 
@@ -98,6 +99,42 @@ export const getUserById = async (req, res, next) => {
   } catch (error) {
     error.code = 400;
     error.message = "Bad request";
+    next(error);
+  }
+};
+
+export const updateUser = async (req, res, next) => {
+  const user: IUser = req.body;
+  const { idUser } = req.params;
+  const authExist = req.header("Authorization");
+  const token = authExist.split(" ")[1];
+  const loggedUser = jwt.verify(token, process.env.TOKEN);
+  const loggedUserId = loggedUser.id;
+  const userFound = await User.findOne({ idUser, loggedUserId });
+  try {
+    if (idUser) {
+      if (userFound) {
+        const updatedUser = await User.findByIdAndUpdate(idUser, user, {
+          new: true,
+        });
+        res.json(updatedUser);
+      } else {
+        const error: { message: string; code: number } = {
+          message: "Can't update other people",
+          code: 401,
+        };
+        next(error);
+      }
+    } else {
+      const error: { message: string; code: number } = {
+        message: "User not found",
+        code: 404,
+      };
+      next(error);
+    }
+  } catch (error) {
+    error.code = 400;
+    error.message = "Bad update request";
     next(error);
   }
 };
