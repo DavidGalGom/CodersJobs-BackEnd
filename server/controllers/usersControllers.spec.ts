@@ -5,7 +5,7 @@ import User from "../../database/models/user";
 import IResponseTest from "../../interfaces/response";
 import TestError from "../../interfaces/testError";
 import IUser from "../../interfaces/user";
-import { addUser, getUsers, loginUser } from "./usersControllers";
+import { addUser, getUserById, getUsers, loginUser } from "./usersControllers";
 
 jest.mock("../../database/models/user");
 jest.mock("bcrypt");
@@ -191,6 +191,81 @@ describe("Given a getUsers function", () => {
         "message",
         "Can't find the users"
       );
+      expect(next.mock.calls[0][0]).toHaveProperty("code", 400);
+    });
+  });
+});
+
+describe("Given a getUsersById function", () => {
+  describe("When it receives a correct userId", () => {
+    test("Then it should summon res.json with the user", async () => {
+      const user: IUser = {
+        userName: "Admin",
+        password: "*******",
+        name: "Admin",
+        email: "admin@gmail.com",
+        isAdmin: true,
+        jobsApplied: [],
+      };
+      const userId: number = 12345;
+      const req: { params } = {
+        params: userId,
+      };
+      const res: { json: jest.Mock } = {
+        json: jest.fn(),
+      };
+      User.findById = jest
+        .fn()
+        .mockReturnValue({ populate: jest.fn().mockResolvedValue(user) });
+
+      await getUserById(req, res, null);
+
+      expect(User.findById).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith(user);
+    });
+  });
+
+  describe("When it receives a wrong id", () => {
+    test("Then it should send a 404 error User not found", async () => {
+      User.findById = jest
+        .fn()
+        .mockReturnValue({ populate: jest.fn().mockResolvedValue(null) });
+      const userId: number = 12345;
+      const req: { params } = {
+        params: userId,
+      };
+      const res: { json } = {
+        json: jest.fn(),
+      };
+      const next: jest.Mock = jest.fn();
+      const expectedError = new Error("User not found") as TestError;
+      expectedError.code = 404;
+
+      await getUserById(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expectedError);
+      expect(next.mock.calls[0][0]).toHaveProperty("message", "User not found");
+      expect(next.mock.calls[0][0]).toHaveProperty("code", 404);
+    });
+  });
+
+  describe("When its called wrong", () => {
+    test("Then it should return an error and code 400 ", async () => {
+      const userId: number = 12345;
+      const req: { params } = {
+        params: userId,
+      };
+      const next: jest.Mock = jest.fn();
+      const expectedError = new Error("Bad request") as TestError;
+      expectedError.code = 400;
+      User.findById = jest.fn().mockReturnValue({
+        populate: jest.fn().mockRejectedValue({}),
+      });
+
+      await getUserById(req, null, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(next.mock.calls[0][0]).toHaveProperty("message", "Bad request");
       expect(next.mock.calls[0][0]).toHaveProperty("code", 400);
     });
   });

@@ -141,7 +141,7 @@ describe("Given a getJobById function", () => {
 
   describe("When it receives a request with a wrong idJob", () => {
     test("Then it should summon next with a code 404 and a jon not found message", async () => {
-      const error: any = new Error("Job not found");
+      const error = new Error("Job not found");
       Job.findById = jest.fn().mockResolvedValue(null);
       const idJob: number = 10;
       const req = {
