@@ -110,12 +110,11 @@ export const updateUser = async (req, res, next) => {
   const token = authExist.split(" ")[1];
   const loggedUser = jwt.verify(token, process.env.TOKEN);
   const loggedUserId = loggedUser.id;
-  // const userFound = await User.findOne({ idUser, loggedUserId });
-  const userFound = await User.findById(idUser);
+  const userFound = await User.findOne({ idUser, loggedUserId });
 
   try {
-    if (userFound) {
-      if (idUser && idUser === loggedUserId) {
+    if (idUser) {
+      if (userFound) {
         const updatedUser = await User.findByIdAndUpdate(idUser, user, {
           new: true,
         });
