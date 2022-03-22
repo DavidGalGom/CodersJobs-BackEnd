@@ -138,3 +138,23 @@ export const updateUser = async (req, res, next) => {
     next(error);
   }
 };
+
+export const adminDeleteUser = async (req, res, next) => {
+  const { idUser } = req.params;
+  try {
+    const deletedUser = await User.findByIdAndDelete(idUser);
+    if (deletedUser) {
+      res.json({ deletedUser });
+    } else {
+      const error: { message: string; code: number } = {
+        message: "User not found",
+        code: 404,
+      };
+      next(error);
+    }
+  } catch (error) {
+    error.code = 400;
+    error.message = "Bad request";
+    next(error);
+  }
+};
