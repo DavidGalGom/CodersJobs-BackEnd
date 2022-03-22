@@ -7,6 +7,7 @@ import TestError from "../../interfaces/testError";
 import IUser from "../../interfaces/user";
 import {
   addUser,
+  adminDeleteUser,
   getUserById,
   getUsers,
   loginUser,
@@ -437,6 +438,72 @@ describe("Given a updateUser function", () => {
         "Can't update other people"
       );
       expect(next.mock.calls[0][0]).toHaveProperty("code", 401);
+    });
+  });
+});
+
+describe("Given a adminDeleteUser endpoint", () => {
+  describe("When it receives a correct idUser", () => {
+    test("Then it should summon res.json with the deleted user", async () => {
+      const idUser: number = 123;
+      const req: { params: { idUser } } = {
+        params: {
+          idUser,
+        },
+      };
+      const res = { json: jest.fn() };
+      User.findByIdAndDelete = jest.fn().mockResolvedValue(idUser);
+
+      await adminDeleteUser(req, res, null);
+
+      expect(User.findByIdAndDelete).toHaveBeenCalledWith(idUser);
+      expect(res.json).toHaveBeenCalled();
+    });
+  });
+
+  describe("When it receives an inexistent idUser", () => {
+    test("Then it should call next with a 404 code and User not found", async () => {
+      const idUser: number = 1;
+      const req: { params: { idUser } } = {
+        params: {
+          idUser,
+        },
+      };
+      const next = jest.fn();
+      User.findByIdAndDelete = jest.fn().mockResolvedValue(null);
+      const error: { message: string; code: number } = {
+        message: "User not found",
+        code: 404,
+      };
+
+      await adminDeleteUser(req, null, next);
+
+      expect(next).toHaveBeenCalledWith(error);
+      expect(error).toHaveProperty("message", "User not found");
+      expect(error).toHaveProperty("code", 404);
+    });
+  });
+
+  describe("When it receives a wrong request", () => {
+    test("Then it should call next with a 400 code and Bad request message", async () => {
+      const idUser: number = 1;
+      const req: { params: { idUser } } = {
+        params: {
+          idUser,
+        },
+      };
+      const next = jest.fn();
+      const error: { message: string; code: number } = {
+        message: "Bad request",
+        code: 400,
+      };
+      User.findByIdAndDelete = jest.fn().mockRejectedValue(error);
+
+      await adminDeleteUser(req, null, next);
+
+      expect(next).toHaveBeenCalledWith(error);
+      expect(error).toHaveProperty("message", "Bad request");
+      expect(error).toHaveProperty("code", 400);
     });
   });
 });
