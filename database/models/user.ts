@@ -1,5 +1,17 @@
 import { Schema, model, Types } from "mongoose";
 
+const jobAppliedSchema = new Schema({
+  jobId: {
+    type: Types.ObjectId,
+    ref: "Job",
+    required: true,
+  },
+  status: {
+    type: String,
+    required: true,
+  },
+});
+
 const userSchema = new Schema({
   userName: {
     type: String,
@@ -22,8 +34,7 @@ const userSchema = new Schema({
     default: false,
   },
   jobsApplied: {
-    type: [Types.ObjectId],
-    ref: "Job",
+    type: [jobAppliedSchema],
     required: true,
   },
 });
