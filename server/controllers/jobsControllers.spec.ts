@@ -1,7 +1,13 @@
 import { expect } from "@jest/globals";
 import jwt from "jsonwebtoken";
 import Job from "../../database/models/job";
-import { getJobs, createJob, getJobById, updateJob } from "./jobsControllers";
+import {
+  getJobs,
+  createJob,
+  getJobById,
+  updateJob,
+  deleteJob,
+} from "./jobsControllers";
 import IJob from "../../interfaces/job";
 import TestError from "../../interfaces/testError";
 import IResponseTest from "../../interfaces/response";
@@ -113,8 +119,144 @@ describe("Given a createJob function", () => {
 });
 
 describe("Given a deleteJob function", () => {
-  describe("When it receives an id of a job and a wrong request", () => {
-    test("Then it should return an error with a 400 code", async () => {});
+  describe("When it receives an id of a job using other user", () => {
+    test("Then it should return an error with a 401 code", async () => {
+      const job: IJob = {
+        title: " sample job",
+        company: "sample company",
+        companyAnchor: "sample company anchor",
+        jobAnchor: "sample job anchor",
+        description: "sample description",
+        contactPerson: "sample person",
+        salary: 28000,
+        numberOfWorkers: 6,
+        startup: true,
+        location: "Barcelona",
+        desiredProfile: "sample profile",
+        image: "sample image",
+        releaseDate: "15/03/2022",
+      };
+      const idJob: number = 12345;
+      const userId: number = 12345;
+      const req: { params; header } = {
+        params: { idJob },
+        header: () => "Authorization",
+      };
+      jwt.verify = jest.fn().mockResolvedValue(userId);
+      const next: jest.Mock = jest.fn();
+      Job.findOne = jest.fn().mockResolvedValue(null);
+      Job.findByIdAndDelete = jest.fn().mockResolvedValue(job);
+
+      await deleteJob(req, null, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(next.mock.calls[0][0]).toHaveProperty(
+        "message",
+        "Can't delete other people jobs"
+      );
+      expect(next.mock.calls[0][0]).toHaveProperty("code", 401);
+    });
+  });
+
+  describe("When it receives an wrong idJob", () => {
+    test("Then it should return an error with a 404 Job not found", async () => {
+      const job: IJob = {
+        title: " sample job",
+        company: "sample company",
+        companyAnchor: "sample company anchor",
+        jobAnchor: "sample job anchor",
+        description: "sample description",
+        contactPerson: "sample person",
+        salary: 28000,
+        numberOfWorkers: 6,
+        startup: true,
+        location: "Barcelona",
+        desiredProfile: "sample profile",
+        image: "sample image",
+        releaseDate: "15/03/2022",
+      };
+      const idJob: number = 12345;
+      const userId: number = 12345;
+      const req: { params; header } = {
+        params: idJob,
+        header: () => "Authorization",
+      };
+      jwt.verify = jest.fn().mockResolvedValue(userId);
+      const next: jest.Mock = jest.fn();
+      Job.findOne = jest.fn().mockResolvedValue(null);
+      Job.findByIdAndDelete = jest.fn().mockResolvedValue(job);
+
+      await deleteJob(req, null, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(next.mock.calls[0][0]).toHaveProperty("message", "Job not found");
+      expect(next.mock.calls[0][0]).toHaveProperty("code", 404);
+    });
+  });
+
+  describe("When it receives a correct request", () => {
+    test("Then it should summon res.json", async () => {
+      const idJob: number = 123456;
+      const userId: number = 12345;
+      const job: IJob = {
+        title: " sample job",
+        company: "sample company",
+        companyAnchor: "sample company anchor",
+        jobAnchor: "sample job anchor",
+        description: "sample description",
+        contactPerson: "sample person",
+        salary: 28000,
+        numberOfWorkers: 6,
+        startup: true,
+        location: "Barcelona",
+        desiredProfile: "sample profile",
+        image: "sample image",
+        releaseDate: "15/03/2022",
+        owner: 12345,
+      };
+      jwt.verify = jest.fn().mockResolvedValue(userId);
+      Job.findOne = jest.fn().mockResolvedValue(job);
+      const req: { params; header } = {
+        params: { idJob },
+        header: () => "Authorization",
+      };
+      const res: { json } = {
+        json: jest.fn(),
+      };
+      Job.findByIdAndDelete = jest.fn().mockResolvedValue(idJob);
+
+      await deleteJob(req, res, null);
+
+      expect(res.json).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith(idJob);
+    });
+  });
+
+  describe("When it receives an wrong request", () => {
+    test("Then it should return an error with a 400 bad delete request", async () => {
+      const idJob: number = 12345;
+      const userId: number = 12345;
+      const req: { params; header } = {
+        params: { idJob },
+        header: () => "Authorization",
+      };
+      const expectedError: { message: string; code: number } = {
+        message: "Bad delete request",
+        code: 400,
+      };
+      jwt.verify = jest.fn().mockResolvedValue(userId);
+      const next: jest.Mock = jest.fn();
+      Job.findByIdAndDelete = jest.fn().mockRejectedValue(expectedError);
+
+      await deleteJob(req, null, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(next.mock.calls[0][0]).toHaveProperty(
+        "message",
+        "Bad delete request"
+      );
+      expect(next.mock.calls[0][0]).toHaveProperty("code", 400);
+    });
   });
 });
 
