@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import Job from "../../database/models/job";
+import IError from "../../interfaces/error";
 import IJob from "../../interfaces/job";
 
 dotenv.config();
@@ -107,7 +108,7 @@ export const getJobById = async (req, res, next) => {
     if (searchedJob) {
       res.json(searchedJob);
     } else {
-      const error: any = new Error("Job not found");
+      const error = new Error("Job not found") as IError;
       error.code = 404;
       next(error);
     }

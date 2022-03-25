@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../../database/models/user";
 import IUser from "../../interfaces/user";
+import IError from "../../interfaces/error";
 
 dotenv.config();
 
@@ -92,7 +93,7 @@ export const getUserById = async (req, res, next) => {
     if (searchedUser) {
       res.json(searchedUser);
     } else {
-      const error: any = new Error("User not found");
+      const error = new Error("User not found") as IError;
       error.code = 404;
       next(error);
     }
