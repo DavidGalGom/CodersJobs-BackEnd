@@ -12,5 +12,5 @@ export default interface IJob {
   desiredProfile: string;
   image: string;
   releaseDate: Date | string;
-  owner?: any;
+  owner?: string;
 }

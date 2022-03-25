@@ -212,7 +212,7 @@ describe("Given a deleteJob function", () => {
         desiredProfile: "sample profile",
         image: "sample image",
         releaseDate: "15/03/2022",
-        owner: 12345,
+        owner: "12345",
       };
       jwt.verify = jest.fn().mockResolvedValue(userId);
       Job.findOne = jest.fn().mockResolvedValue(job);
